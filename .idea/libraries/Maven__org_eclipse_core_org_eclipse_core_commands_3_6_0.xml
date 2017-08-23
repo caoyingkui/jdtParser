@@ -1,0 +1,15 @@
+<component name="libraryTable">
+  <library name="Maven: org.eclipse.core:org.eclipse.core.commands:3.6.0">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/eclipse/core/org.eclipse.core.commands/3.6.0/org.eclipse.core.commands-3.6.0.jar!/" />
+      <root url="jar://F:/Tomcat 8.0/lib/SqlConnector.jar!/" />
+      <root url="jar://F:/Java/jre1.8.0_111/lib/mysql-connector-java-5.1.6.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/org/eclipse/core/org.eclipse.core.commands/3.6.0/org.eclipse.core.commands-3.6.0-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/eclipse/core/org.eclipse.core.commands/3.6.0/org.eclipse.core.commands-3.6.0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
