@@ -20,6 +20,81 @@ public class JATParser {
     private ASTParser astParser = ASTParser.newParser(AST.JLS3); // 非常慢
     private static MethodInvocation sta;
 
+    public static void main(String[] args) throws Exception {
+        JATParser pa = new JATParser();
+
+        BufferedReader reader = new BufferedReader(new FileReader("C:\\Users\\oliver\\Desktop\\java.txt"));
+        String line ;
+        String lines = "";
+        while((line = reader.readLine())!= null){
+            lines += line;
+        }
+
+        Map<Integer , ASTNode> map = pa.parseCodeSnippet(lines);
+
+
+        /*while(true) {
+            JATParser jdt = new JATParser();
+            BufferedReader reader = new BufferedReader(new FileReader("C:\\Users\\oliver\\Desktop\\test.java"));
+            String line;
+            //String completeLine = "";
+            while ((line = reader.readLine()) != null) {
+                jdt.parseCodeLine(line);
+            }
+            reader.close();
+            jdt.codeGraph.showGraph();
+            System.out.println(jdt.codeGraph.getSalientAPI());
+        }*/
+
+
+
+
+        /*JATParser jdt ;
+        jdt = new JATParser();
+        FileInputStream javaFileInputStream = new FileInputStream("C:\\Users\\oliver\\Desktop\\test.java");
+
+        jdt.classDeclarationParser(javaFileInputStream);
+
+        CompilationUnit result = jdt.getCompilationUnit(javaFileInputStream);
+        List commentList = result.getCommentList();// 获取注释信息,包含 doc注释和单行注释
+        PackageDeclaration package1 = result.getPackage();// 获取所在包信息
+        // 如:"package readjavafile;"
+        List importList = result.imports();// 获取导入的包
+        TypeDeclaration type = (TypeDeclaration) result.types().get(0);// 获取文件中的第一个类声明(包含注释)
+        FieldDeclaration[] fieldList = type.getFields();// 获取类的成员变量
+
+        MethodDeclaration[] methodList = type.getMethods();// 获取方法的注释以及方法体
+        Type method_type = methodList[0].getReturnType2();// 获取返回值类型 如 void
+        SimpleName method_name = methodList[0].getName();// 获取方法名 main
+        Javadoc o1 = methodList[0].getJavadoc();// 获取方法的注释
+        List o4 = methodList[0].thrownExceptions();// 异常
+        List o5 = methodList[0].modifiers();// 访问类型如:[public, static]
+        List o6 = methodList[0].parameters();// 获取参数:[String[] args]
+        Block method_block = methodList[0].getBody();// 获取方法的内容如:"{System.out.println("Hello");}"
+        List statements = method_block.statements();// 获取方法内容的所有行
+
+        jdt.codeGraph.showGraph();
+        System.out.println(statements.get(0).getClass());
+
+        // 获取第一行的内容
+        Iterator it = statements.iterator();
+        while(it.hasNext()){
+            Object st = it.next();
+            if(st instanceof VariableDeclarationStatement ){
+                jdt.variableDeclarationStatementParser((VariableDeclarationStatement)st);
+            }
+        }
+        VariableDeclarationStatement test =(VariableDeclarationStatement) statements.get(9);
+        //VariableDeclarationStatement test= (VariableDeclarationStatement)(((ExpressionStatement)(statements.get(9))).getExpression());
+
+        Type tttype = test.getType();
+        System.out.println(tttype.getClass());
+
+        //System.out.println(sta.);
+        System.out.println(statements.get(0).toString());*/
+
+    }
+
     /**
      * 获得java源文件的结构CompilationUnit
      */
@@ -35,6 +110,52 @@ public class JATParser {
         CompilationUnit result = (CompilationUnit) (this.astParser
                 .createAST(null)); // 很慢
 
+        return result;
+    }
+
+    /**
+     * Given a code snippet, which is represented by a String codeSnippet, then parse the code.
+     * @param codeSnippet: the code snippet
+     * @return <kind , ASTNode> if succeed: kind will take on of the 4 values which represent the type of the astCode
+     *     1、K_CLASS_BODY_DECLARATIONS: Kind constant used to request that the source be parsed as a sequence of class body declarations.
+     *     2、K_COMPILATION_UNIT: Kind constant used to request that the source be parsed as a compilation unit.
+     *     3、K_EXPRESSION: Kind constant used to request that the source be parsed as a single expression.
+     *     4、K_STATEMENTS: Kind constant used to request that the source be parsed as a sequence of statements.
+     *
+     *     null, if failed.
+     */
+
+    public Map<Integer , ASTNode> parseCodeSnippet(String codeSnippet){
+        Map<Integer , ASTNode> result = new HashMap<>();
+        ASTParser parser = ASTParser.newParser(AST.JLS8);
+        parser.setSource(codeSnippet.toCharArray());
+
+        class InternalParser{
+            boolean parse(Map<Integer , ASTNode> result ,  int kind ){
+                parser.setKind(kind);
+                ASTNode node ;
+                try{
+                    node = parser.createAST(null);
+                    result.put(kind , node);
+                } catch(IllegalStateException e){
+                    result.clear();
+                    return false;
+                }
+                return true;
+            }
+        }
+
+        InternalParser temp = new InternalParser();
+        if(!(
+                temp.parse(result , ASTParser.K_STATEMENTS) ||
+                temp.parse(result , ASTParser.K_COMPILATION_UNIT )||
+                temp.parse(result , ASTParser.K_CLASS_BODY_DECLARATIONS) ||
+
+                temp.parse(result , ASTParser.K_EXPRESSION)
+            )
+        ){
+            result = null;
+        }
         return result;
     }
 
@@ -300,70 +421,6 @@ public class JATParser {
         result.setVariableName(variableName);
         result.setVariableOriginType(variableTypeName);
         return result;
-    }
-
-
-    public static void main(String[] args) throws Exception {
-        /*while(true) {
-            JATParser jdt = new JATParser();
-            BufferedReader reader = new BufferedReader(new FileReader("C:\\Users\\oliver\\Desktop\\test.java"));
-            String line;
-            //String completeLine = "";
-            while ((line = reader.readLine()) != null) {
-                jdt.parseCodeLine(line);
-            }
-            reader.close();
-            jdt.codeGraph.showGraph();
-            System.out.println(jdt.codeGraph.getSalientAPI());
-        }*/
-
-
-
-
-        JATParser jdt ;
-        jdt = new JATParser();
-        FileInputStream javaFileInputStream = new FileInputStream("C:\\Users\\oliver\\Desktop\\test.java");
-
-        jdt.classDeclarationParser(javaFileInputStream);
-
-        /*CompilationUnit result = jdt.getCompilationUnit(javaFileInputStream);
-        List commentList = result.getCommentList();// 获取注释信息,包含 doc注释和单行注释
-        PackageDeclaration package1 = result.getPackage();// 获取所在包信息
-        // 如:"package readjavafile;"
-        List importList = result.imports();// 获取导入的包
-        TypeDeclaration type = (TypeDeclaration) result.types().get(0);// 获取文件中的第一个类声明(包含注释)
-        FieldDeclaration[] fieldList = type.getFields();// 获取类的成员变量
-
-        MethodDeclaration[] methodList = type.getMethods();// 获取方法的注释以及方法体
-        Type method_type = methodList[0].getReturnType2();// 获取返回值类型 如 void
-        SimpleName method_name = methodList[0].getName();// 获取方法名 main
-        Javadoc o1 = methodList[0].getJavadoc();// 获取方法的注释
-        List o4 = methodList[0].thrownExceptions();// 异常
-        List o5 = methodList[0].modifiers();// 访问类型如:[public, static]
-        List o6 = methodList[0].parameters();// 获取参数:[String[] args]
-        Block method_block = methodList[0].getBody();// 获取方法的内容如:"{System.out.println("Hello");}"
-        List statements = method_block.statements();// 获取方法内容的所有行
-
-        jdt.codeGraph.showGraph();
-        System.out.println(statements.get(0).getClass());
-
-        // 获取第一行的内容
-        Iterator it = statements.iterator();
-        while(it.hasNext()){
-            Object st = it.next();
-            if(st instanceof VariableDeclarationStatement ){
-                jdt.variableDeclarationStatementParser((VariableDeclarationStatement)st);
-            }
-        }
-        VariableDeclarationStatement test =(VariableDeclarationStatement) statements.get(9);
-        //VariableDeclarationStatement test= (VariableDeclarationStatement)(((ExpressionStatement)(statements.get(9))).getExpression());
-
-        Type tttype = test.getType();
-        System.out.println(tttype.getClass());
-
-        //System.out.println(sta.);
-        System.out.println(statements.get(0).toString());*/
-
     }
 
     //region<statement parsers>
@@ -730,10 +787,10 @@ public class JATParser {
     public ReturnValue parenthesizedExpressionParser(ParenthesizedExpression expression){
         ReturnValue result = null;
 
-        Expression parenttheizedExpression = expression.getExpression();
-        if(parenttheizedExpression instanceof CastExpression){
-            String castType = getTypeName( ((CastExpression) parenttheizedExpression).getType() ) ;
-            Expression castedBody = ((CastExpression) parenttheizedExpression).getExpression();
+        Expression parenthesizedExpression = expression.getExpression();
+        if(parenthesizedExpression instanceof CastExpression){
+            String castType = getTypeName( ((CastExpression) parenthesizedExpression).getType() ) ;
+            Expression castedBody = ((CastExpression) parenthesizedExpression).getExpression();
             if(castedBody instanceof SimpleName){
                 String variableName = ((SimpleName) castedBody).getIdentifier();
                 int variableIndex ;
